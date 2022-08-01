@@ -3,7 +3,7 @@ use anyhow::{
     Result,
 };
 use cargo_metadata::MetadataCommand;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 use std::process::Command;
 
 pub fn run() -> Result<()> {
@@ -23,13 +23,13 @@ pub fn run() -> Result<()> {
     let metadata = cmd.exec().unwrap();
 
     let root_package = metadata.root_package().unwrap();
-    let mut root_deps = HashSet::new();
+    let mut root_deps = BTreeSet::new();
     for dep in &root_package.dependencies {
         // println!("        dep {}: {:?}", dep.name, dep);
         root_deps.insert(dep.name.to_owned());
     }
 
-    let mut all_other_deps = HashSet::new();
+    let mut all_other_deps = BTreeSet::new();
     for pkg in &metadata.packages {
         println!(
             "name: {}, version: {}, edition: {}",
@@ -57,7 +57,7 @@ pub fn run() -> Result<()> {
     println!("root_deps: {:?}", root_deps);
     println!("dup_crates: {:?}", dup_crates);
 
-    let mut maybe_unused = HashSet::new();
+    let mut maybe_unused = BTreeSet::new();
     for c in dup_crates {
         if find_usage(&c)? {
             continue;
