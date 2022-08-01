@@ -1,9 +1,12 @@
-use anyhow::Result;
+use anyhow::{
+    Context,
+    Result,
+};
 use cargo_metadata::MetadataCommand;
 use std::collections::HashSet;
 use std::process::Command;
 
-pub fn run() {
+pub fn run() -> Result<()> {
     let mut args = std::env::args().skip_while(|val| !val.starts_with("--manifest-path"));
 
     let mut cmd = MetadataCommand::new();
@@ -56,13 +59,15 @@ pub fn run() {
 
     let mut maybe_unused = HashSet::new();
     for c in dup_crates {
-        if let Ok(true) = find_usage(&c) {
+        if find_usage(&c)? {
             continue;
         } else {
             maybe_unused.insert(c);
         }
     }
     println!("crates {:?} maybe unused", maybe_unused);
+
+    Ok(())
 }
 
 fn find_usage(c: &str) -> Result<bool> {
@@ -75,12 +80,14 @@ fn find_usage(c: &str) -> Result<bool> {
     let use_output = Command::new("rg")
         .arg("--fixed-strings")
         .arg(format!("use {}", pkg_name))
-        .output()?;
+        .output()
+        .context("Couldn't find executable rg")?;
 
     let direct_use_output = Command::new("rg")
         .arg("--fixed-strings")
         .arg(format!("{}::", pkg_name))
-        .output()?;
+        .output()
+        .context("Couldn't find executable rg")?;
 
     let ok = use_output.status.success() || direct_use_output.status.success();
 
