@@ -1,3 +1,5 @@
-fn main() {
-    cargo_inner::run();
+use anyhow::Result;
+
+fn main() -> Result<()> {
+    cargo_inner::run()
 }
