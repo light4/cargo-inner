@@ -1,10 +1,7 @@
-use anyhow::{
-    Context,
-    Result,
-};
+use std::{collections::BTreeSet, process::Command};
+
+use anyhow::{Context, Result};
 use cargo_metadata::MetadataCommand;
-use std::collections::BTreeSet;
-use std::process::Command;
 
 pub fn run() -> Result<()> {
     let mut args = std::env::args().skip_while(|val| !val.starts_with("--manifest-path"));
